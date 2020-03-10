@@ -54,7 +54,7 @@ function extractPaymentPassword(string $confirmationText): ?string
 
     $extractedPasswords = [];
     foreach ($regularExpressions as $re) {
-        $reForLine = '/^\s*' . $re . '\s*?(?=\R|$)/m'; // catching an end of all lines is the trickiest part!
+        $reForLine = '/^\s*' . $re . '\s*?(?=\R|$)/miu'; // catching an end of all lines is the trickiest part!
         $matchesCount = preg_match_all($reForLine, $confirmationText, $matches, PREG_SET_ORDER);
         if (!$matchesCount) {
             continue;
@@ -97,7 +97,7 @@ function extractReceiverAccount(string $confirmationText): ?string
 
     $extractedAccounts = [];
     foreach ($regularExpressions as $re) {
-        $reForLine = '/^\s*' . $re . '\s*?(?=\R|$)/m'; // catching an end of all lines is the trickiest part!
+        $reForLine = '/^\s*' . $re . '\s*?(?=\R|$)/miu'; // catching an end of all lines is the trickiest part!
         $matchesCount = preg_match_all($reForLine, $confirmationText, $matches, PREG_SET_ORDER);
         if (!$matchesCount) {
             continue;
@@ -141,7 +141,7 @@ function extractDebitedAmount(string $confirmationText): ?float
 
     $extractedSums = [];
     foreach ($regularExpressions as $re) {
-        $reForLine = '/^\s*' . $re . '\s*?(?=\R|$)/m'; // catching an end of all lines is the trickiest part!
+        $reForLine = '/^\s*' . $re . '\s*?(?=\R|$)/miu'; // catching an end of all lines is the trickiest part!
         $matchesCount = preg_match_all($reForLine, $confirmationText, $matches, PREG_SET_ORDER);
         if (!$matchesCount) {
             continue;
