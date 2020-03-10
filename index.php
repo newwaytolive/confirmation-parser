@@ -44,7 +44,7 @@ function parseConfirmationMessage(string $confirmationText): ?array
 function extractPaymentPassword(string $confirmationText): ?string
 {
     /**
-     * Patterns must contain named sub-pattern (?P<password>) and be orthogonal to each other
+     * Patterns must contain named sub-pattern (?P<password>)
      * @var string[] $regularExpressions
      */
     $regularExpressions = [
@@ -64,15 +64,14 @@ function extractPaymentPassword(string $confirmationText): ?string
             return null;
         }
         $extractedPasswords[] = $matches[0]['password'];
+        // will use first match
+        break;
     }
-    if (count($extractedPasswords) > 1) {
-        // non-orthogonal patterns?
-        // @todo to log the input for debugging
-        return null;
-    }
+
     if (count($extractedPasswords) == 0) {
         return null;
     }
+
     return $extractedPasswords[0];
 }
 
@@ -87,7 +86,7 @@ function extractPaymentPassword(string $confirmationText): ?string
 function extractReceiverAccount(string $confirmationText): ?string
 {
     /**
-     * Patterns must contain named sub-pattern (?P<account>) and be orthogonal to each other
+     * Patterns must contain named sub-pattern (?P<account>
      * @var string[] $regularExpressions
      */
     $regularExpressions = [
@@ -107,15 +106,14 @@ function extractReceiverAccount(string $confirmationText): ?string
             return null;
         }
         $extractedAccounts[] = $matches[0]['account'];
+        // will use first match
+        break;
     }
-    if (count($extractedAccounts) > 1) {
-        // non-orthogonal patterns?
-        // @todo to log the input for debugging
-        return null;
-    }
+
     if (count($extractedAccounts) == 0) {
         return null;
     }
+
     return $extractedAccounts[0];
 }
 
@@ -130,12 +128,12 @@ function extractReceiverAccount(string $confirmationText): ?string
 function extractDebitedAmount(string $confirmationText): ?float
 {
     /**
-     * Patterns must contain named sub-patterns for (?P<integer>) and (?P<fraction>)
-     * and be orthogonal to each other
+     * Patterns must contain named sub-patterns for (?P<integer>), and (?P<fraction>) or (?P<fraction_natural>)
      * @var string[] $regularExpressions
      */
     $regularExpressions = [
-        'Спишется\s+(?P<integer>\d{1,})(?:,?(?P<fraction>\d{0,2}))\s*(?:р|р\.|руб|руб\.|рублей)',
+        'Спишется\s+(?P<integer>\d{1,})(?:,?(?P<fraction>\d{0,2}))\s*(?:р|р\.|руб|руб\.|рублей|рубля|рубль)',
+        'Спишется\s+(?:(?P<integer>\d{1,})\s*(?:р|р\.|руб|руб\.|рублей|рубля|рубль))?\s+(?:(?P<fraction_natural>\d{1,2})\s*(?:к|к\.|коп|коп\.|копеек|копейки|копейка))?',
         //'Списываемая сумма\s+(?P<integer>\d{1,})\.(?P<fraction>\d{1,2})р\.',
     ];
 
@@ -150,17 +148,25 @@ function extractDebitedAmount(string $confirmationText): ?float
             // @todo to log the input for debugging
             return null;
         }
-        $integer = $matches[0]['integer'];
-        $fraction = $matches[0]['fraction'];
-        $extractedSums[] = intval($integer) + intval($fraction) / (10 ** strlen($fraction));
+        $integer = 0;
+        $fraction = 0;
+        if (isset($matches[0]['integer'])) {
+            $integer = intval($matches[0]['integer']);
+        }
+        if (isset($matches[0]['fraction'])) {
+            $fractionString = $matches[0]['fraction'];
+            $fraction = intval($fractionString) / (10 ** strlen($fractionString));
+        } elseif (isset($matches[0]['fraction_natural'])) {
+            $fraction = intval($matches[0]['fraction_natural']) / 100;
+        }
+        $extractedSums[] = (float) $integer + $fraction;
+        // will use first match
+        break;
     }
-    if (count($extractedSums) > 1) {
-        // non-orthogonal patterns?
-        // @todo to log the input for debugging
-        return null;
-    }
+
     if (count($extractedSums) == 0) {
         return null;
     }
+
     return $extractedSums[0];
 }
