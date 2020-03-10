@@ -13,7 +13,8 @@
  *  float(123.2)
  * }
  * @param string $confirmationText
- * @return array|null  [passwrod, account, amount]
+ * @return array|null  [password, account, amount] or null if not all of them were found
+ * @return
  */
 function parseConfirmationMessage(string $confirmationText): ?array
 {
@@ -36,12 +37,16 @@ function parseConfirmationMessage(string $confirmationText): ?array
  * Extract password value
  *
  * Must be only one password value in a message.
+ * Otherwise NULL is returned.
  * @param string $confirmationText
  * @return string|null
  */
 function extractPaymentPassword(string $confirmationText): ?string
 {
-    // Patterns must be orthogonal
+    /**
+     * Patterns must be orthogonal
+     * @var string[] $regularExpressions
+     */
     $regularExpressions = [
         'Пароль:\s*(?P<password>\d+)',
 //      'Password:\s*(?P<password>\d+)',
@@ -75,12 +80,16 @@ function extractPaymentPassword(string $confirmationText): ?string
  * Extract receiver account ID
  *
  * Must be only one account ID in a message.
+ * Otherwise NULL is returned.
  * @param string $confirmationText
  * @return string|null
  */
 function extractReceiverAccount(string $confirmationText): ?string
 {
-    // Patterns must be orthogonal
+    /**
+     * Patterns must be orthogonal
+     * @var string[] $regularExpressions
+     */
     $regularExpressions = [
         'Перевод\s+на\s+счет\s+(?P<account>\d{13,16})',
         'Перевод\s+на\s+счёт\s+(?P<account>\d{13,16})',
@@ -113,13 +122,17 @@ function extractReceiverAccount(string $confirmationText): ?string
 /**
  * Extract debited amount
  *
- * Must be only one account ID in a message.
+ * Must be only one value in a message.
+ * Otherwise NULL is returned.
  * @param string $confirmationText
  * @return float|null
  */
 function extractDebitedAmount(string $confirmationText): ?float
 {
-    // Patterns must be orthogonal
+    /**
+     * Patterns must be orthogonal
+     * @var string[] $regularExpressions
+     */
     $regularExpressions = [
         'Спишется\s+(?P<integer>\d{1,})(?:,?(?P<fractional>\d{0,2}))\s*(?:р|р\.|руб|руб\.|рублей)',
         //'Списываемая сумма\s+(?P<integer>\d{1,})\.(?P<fractional>\d{1,2})р\.',
