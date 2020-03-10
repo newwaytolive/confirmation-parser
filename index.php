@@ -44,7 +44,7 @@ function parseConfirmationMessage(string $confirmationText): ?array
 function extractPaymentPassword(string $confirmationText): ?string
 {
     /**
-     * Patterns must be orthogonal
+     * Patterns must contain named sub-pattern (?P<password>) and be orthogonal to each other
      * @var string[] $regularExpressions
      */
     $regularExpressions = [
@@ -87,7 +87,7 @@ function extractPaymentPassword(string $confirmationText): ?string
 function extractReceiverAccount(string $confirmationText): ?string
 {
     /**
-     * Patterns must be orthogonal
+     * Patterns must contain named sub-pattern (?P<account>) and be orthogonal to each other
      * @var string[] $regularExpressions
      */
     $regularExpressions = [
@@ -130,12 +130,13 @@ function extractReceiverAccount(string $confirmationText): ?string
 function extractDebitedAmount(string $confirmationText): ?float
 {
     /**
-     * Patterns must be orthogonal
+     * Patterns must contain named sub-patterns for (?P<integer>) and (?P<fraction>)
+     * and be orthogonal to each other
      * @var string[] $regularExpressions
      */
     $regularExpressions = [
-        'Спишется\s+(?P<integer>\d{1,})(?:,?(?P<fractional>\d{0,2}))\s*(?:р|р\.|руб|руб\.|рублей)',
-        //'Списываемая сумма\s+(?P<integer>\d{1,})\.(?P<fractional>\d{1,2})р\.',
+        'Спишется\s+(?P<integer>\d{1,})(?:,?(?P<fraction>\d{0,2}))\s*(?:р|р\.|руб|руб\.|рублей)',
+        //'Списываемая сумма\s+(?P<integer>\d{1,})\.(?P<fraction>\d{1,2})р\.',
     ];
 
     $extractedSums = [];
@@ -150,8 +151,8 @@ function extractDebitedAmount(string $confirmationText): ?float
             return null;
         }
         $integer = $matches[0]['integer'];
-        $fract = $matches[0]['fractional'];
-        $extractedSums[] = intval($integer) + intval($fract) / (10 ** strlen($fract));
+        $fraction = $matches[0]['fraction'];
+        $extractedSums[] = intval($integer) + intval($fraction) / (10 ** strlen($fraction));
     }
     if (count($extractedSums) > 1) {
         // non-orthogonal patterns?
